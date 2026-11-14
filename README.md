@@ -1,4 +1,4 @@
-[![Unit Tests & JaCoCo Coverage](https://github.com)](https://github.com)
+[![Unit Tests & JaCoCo Coverage](https://github.com/LeonidGorbunov/java-unit-testing-delivery-ju5/actions/workflows/ci.yml/badge.svg)](https://github.com/LeonidGorbunov/java-unit-testing-delivery-ju5/actions/workflows/ci.yml)
 [![JaCoCo Coverage](https://img.shields.io/badge/JaCoCo-100%25-brightgreen)](https://leonidgorbunov.github.io/java-unit-testing-delivery-ju5/)
 # Java Unit Testing Delivery Service Project
 
