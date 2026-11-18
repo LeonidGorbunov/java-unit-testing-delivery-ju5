@@ -37,13 +37,20 @@ public class DeliveryService {
         Courier chosenCourier = availableCouriers.get(0);
         courierRepository.assignOrderToCourier(chosenCourier, orderId);
 
-        if ("Пешком".equals(chosenCourier.getTransportType())) {
-            notificationService.sendSms(clientPhone, "К вам выехал курьер " + chosenCourier.getName()
-                    + ". Общая стоимость, руб: " + totalPrice);
+        if (notificationService.isSmsGatewayAvailable()) {
+
+            if ("Пешком".equals(chosenCourier.getTransportType())) {
+                notificationService.sendSms(clientPhone, "К вам выехал курьер " + chosenCourier.getName()
+                        + ". Общая стоимость, руб: " + totalPrice);
+            } else {
+                notificationService.sendSms(clientPhone, "К вам выехал курьер " +
+                        chosenCourier.getName() + " на машине. Доставим молниеносно!" + " Общая стоимость, руб: " + totalPrice);
+            }
+
         } else {
-            notificationService.sendSms(clientPhone, "К вам выехал курьер " +
-                    chosenCourier.getName() + " на машине. Доставим молниеносно!" + " Общая стоимость, руб: " + totalPrice);
+            System.out.println("SMS-шлюз недоступен, уведомление для заказа " + orderId + " отложено");
         }
+
         return chosenCourier.getName();
     }
 }

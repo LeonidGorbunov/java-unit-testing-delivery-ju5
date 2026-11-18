@@ -89,10 +89,11 @@ class DeliveryServiceTest {
         when(distanceCalculatorMock.calculateDistanceInKm(anyString(), anyString())).thenReturn(5.0);
         when(discountPolicyMock.applyDiscount(anyDouble())).thenReturn(400.0);
         when(courierRepositoryMock.findAvailableCouriers()).thenReturn(List.of(courier));
+        doReturn(true).when(notificationServiceSpy).isSmsGatewayAvailable();
 
         deliveryService.processDelivery(orderId, clientPhone, from, to);
 
-        verify(notificationServiceSpy).sendSms(clientPhone, expectedText);
+        verify(notificationServiceSpy, description("Метод должен отправить смс!")).sendSms(clientPhone, expectedText);
     }
 
     @ParameterizedTest
@@ -102,6 +103,22 @@ class DeliveryServiceTest {
         when(distanceCalculatorMock.calculateDistanceInKm(anyString(), anyString())).thenReturn(5.0);
         when(discountPolicyMock.applyDiscount(anyDouble())).thenReturn(400.0);
         when(courierRepositoryMock.findAvailableCouriers()).thenReturn(List.of(courier));
+        doReturn(true).when(notificationServiceSpy).isSmsGatewayAvailable();
+
+        String expectedCourierName = courier.getName();
+        String actualCourierName = deliveryService.processDelivery(orderId, clientPhone, from, to);
+
+        assertEquals(expectedCourierName, actualCourierName, "Метод должен возвращать имя курьера: " + expectedCourierName);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideDataForProcessDelivery")
+    void shouldReturnCourierNameWhenSmsGatewayUnavailable(String orderId, String clientPhone,
+                                                          String from, String to, Courier courier, String expectedText) {
+        when(distanceCalculatorMock.calculateDistanceInKm(anyString(), anyString())).thenReturn(5.0);
+        when(discountPolicyMock.applyDiscount(anyDouble())).thenReturn(400.0);
+        when(courierRepositoryMock.findAvailableCouriers()).thenReturn(List.of(courier));
+        doReturn(false).when(notificationServiceSpy).isSmsGatewayAvailable();
 
         String expectedCourierName = courier.getName();
         String actualCourierName = deliveryService.processDelivery(orderId, clientPhone, from, to);
@@ -116,9 +133,24 @@ class DeliveryServiceTest {
         when(distanceCalculatorMock.calculateDistanceInKm(anyString(), anyString())).thenReturn(5.0);
         when(discountPolicyMock.applyDiscount(anyDouble())).thenReturn(400.0);
         when(courierRepositoryMock.findAvailableCouriers()).thenReturn(List.of(courier));
+        doReturn(true).when(notificationServiceSpy).isSmsGatewayAvailable();
 
         deliveryService.processDelivery(orderId, clientPhone, from, to);
 
-        verify(courierRepositoryMock).assignOrderToCourier(courier, orderId);
+        verify(courierRepositoryMock, description("Метод должен назначить заказ " + orderId + " курьеру " + courier.getName()))
+                .assignOrderToCourier(courier, orderId);
+    }
+
+    @Test
+    void shouldSkipSmsSendingWhenGatewayUnavailable() {
+        when(distanceCalculatorMock.calculateDistanceInKm(anyString(), anyString())).thenReturn(5.0);
+        when(discountPolicyMock.applyDiscount(anyDouble())).thenReturn(500.0);
+        when(courierRepositoryMock.findAvailableCouriers()).thenReturn(List.of(new Courier("Барт")));
+        doReturn(false).when(notificationServiceSpy).isSmsGatewayAvailable();
+
+        deliveryService.processDelivery("Test", "88888888888", "Пункт А", "Пункт Б");
+
+        verify(notificationServiceSpy, never().description("При недоступном SMS-шлюзе отправка SMS не должна вызываться!"))
+                .sendSms(anyString(), anyString());
     }
 }
