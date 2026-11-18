@@ -37,14 +37,21 @@ public class DeliveryService {
 <span class="fc" id="L37">        Courier chosenCourier = availableCouriers.get(0);</span>
 <span class="fc" id="L38">        courierRepository.assignOrderToCourier(chosenCourier, orderId);</span>
 
-<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (&quot;Пешком&quot;.equals(chosenCourier.getTransportType())) {</span>
-<span class="fc" id="L41">            notificationService.sendSms(clientPhone, &quot;К вам выехал курьер &quot; + chosenCourier.getName()</span>
-                    + &quot;. Общая стоимость, руб: &quot; + totalPrice);
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (notificationService.isSmsGatewayAvailable()) {</span>
+
+<span class="fc bfc" id="L42" title="All 2 branches covered.">            if (&quot;Пешком&quot;.equals(chosenCourier.getTransportType())) {</span>
+<span class="fc" id="L43">                notificationService.sendSms(clientPhone, &quot;К вам выехал курьер &quot; + chosenCourier.getName()</span>
+                        + &quot;. Общая стоимость, руб: &quot; + totalPrice);
+            } else {
+<span class="fc" id="L46">                notificationService.sendSms(clientPhone, &quot;К вам выехал курьер &quot; +</span>
+<span class="fc" id="L47">                        chosenCourier.getName() + &quot; на машине. Доставим молниеносно!&quot; + &quot; Общая стоимость, руб: &quot; + totalPrice);</span>
+            }
+
         } else {
-<span class="fc" id="L44">            notificationService.sendSms(clientPhone, &quot;К вам выехал курьер &quot; +</span>
-<span class="fc" id="L45">                    chosenCourier.getName() + &quot; на машине. Доставим молниеносно!&quot; + &quot; Общая стоимость, руб: &quot; + totalPrice);</span>
+<span class="fc" id="L51">            System.out.println(&quot;SMS-шлюз недоступен, уведомление для заказа &quot; + orderId + &quot; отложено&quot;);</span>
         }
-<span class="fc" id="L47">        return chosenCourier.getName();</span>
+
+<span class="fc" id="L54">        return chosenCourier.getName();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
